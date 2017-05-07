@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using IqdbApi.Enums;
@@ -20,7 +21,7 @@ namespace IqdbApi.Test
         {
             // arrange
             IIqdbApi api = new IqdbApi();
-
+            
             // act
             var result = await api.SearchUrl(url);
 
@@ -30,7 +31,6 @@ namespace IqdbApi.Test
             if (result.IsFound)
             {
                 Assert.NotNull(result.Matches);
-                Assert.Greater(result.Matches.Count(match => match.MatchType == MatchType.Additional), 1);
                 Assert.Greater(result.Matches.Count(match => match.MatchType == MatchType.Other), 0);
                 Assert.AreEqual(result.Matches.Count(match => match.MatchType == MatchType.Best), 1);
 
@@ -85,6 +85,79 @@ namespace IqdbApi.Test
             // resolution
             Assert.ThrowsAsync<ImageTooLagreException>(() => api.SearchUrl("https://files.yande.re/image/cd73e77b015a257fa807afdc3043cbc0/yande.re%20277274%20aoki_hagane_no_arpeggio%20ass%20bikini%20morita_kazuaki%20panty_pull%20stick_poster%20swimsuits%20takao_%28aoki_hagane_no_arpeggio%29.jpg"));
 
+        }
+
+        [Test]
+        [TestCase("Resources/9cc122fe5884a090d1dfe6832b8ed19f.jpg")]
+        public async Task SearchFileSuccess(string filename)
+        {
+            // arrange
+            IIqdbApi api = new IqdbApi();
+            SearchResult result;
+
+            // act
+            using (var fs = new FileStream(filename, FileMode.Open))
+            {
+                result = await api.SearchFile(fs);
+            }
+
+            // assert
+            Assert.NotNull(result);
+
+            if (result.IsFound)
+            {
+                Assert.NotNull(result.Matches);
+                Assert.Greater(result.Matches.Count(match => match.MatchType == MatchType.Additional), 1);
+                Assert.Greater(result.Matches.Count(match => match.MatchType == MatchType.Other), 0);
+                Assert.AreEqual(result.Matches.Count(match => match.MatchType == MatchType.Best), 1);
+
+            }
+            else
+            {
+                Assert.AreEqual(result.Matches.Count(match => match.MatchType == MatchType.Best), 0);
+                Assert.AreEqual(result.Matches.Count(match => match.MatchType == MatchType.Additional), 0);
+            }
+
+            Assert.Greater(result.SearchedImagesCount, 0);
+            Assert.Greater(result.SearchedInSeconds, 0);
+
+            Assert.NotNull(result.YourImage);
+            Assert.IsFalse(String.IsNullOrWhiteSpace(result.YourImage.Name));
+            Assert.IsFalse(String.IsNullOrWhiteSpace(result.YourImage.PreviewUrl));
+            Assert.IsFalse(String.IsNullOrWhiteSpace(result.YourImage.Size));
+
+            foreach (var match in result.Matches)
+            {
+                Assert.Greater(match.Similarity, 0);
+                Assert.AreNotEqual(match.Resolution, default(Resolution));
+
+                Assert.IsFalse(String.IsNullOrWhiteSpace(match.PreviewUrl));
+                Assert.IsFalse(String.IsNullOrWhiteSpace(match.Url));
+            }
+        }
+
+        [Test]
+        public void SearchFileException()
+        {
+            // arrange
+            IIqdbApi api = new IqdbApi();
+
+            // act
+            // assert
+
+            var fs = new FileStream("Resources/favicon.ico", FileMode.Open);
+
+            Assert.ThrowsAsync<InvalidFileFormatException>(() => api.SearchFile(fs));
+
+
+            Assert.ThrowsAsync<ArgumentNullException>(() => api.SearchFile(null));
+
+            fs.Dispose();
+            fs = new FileStream("Resources/large.jpg", FileMode.Open);
+
+            Assert.ThrowsAsync<ImageTooLagreException>(() => api.SearchFile(fs));
+
+            fs.Dispose();
         }
     }
 }
