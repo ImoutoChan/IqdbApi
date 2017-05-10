@@ -140,8 +140,13 @@ namespace IqdbApi
             newMatch.Source = GetSource(match.SelectSingleNode("table/tr[2]/td/text()").InnerText);
 
             var resStrings = match.SelectSingleNode("table/tr[3]/td")?.InnerText?.Split(' ');
-            newMatch.Resolution = GetResolution(resStrings.First()).Value;
+            if (resStrings?.Length == 2)
+            {
+                newMatch.Resolution = GetResolution(resStrings.First()).Value;
+            }
+
             newMatch.Rating = GetRating(resStrings.Last());
+            
 
             newMatch.Similarity = GetSimilarity(match.SelectSingleNode("table/tr[4]/td")?.InnerText);
 
@@ -238,6 +243,8 @@ namespace IqdbApi
                     return Rating.Safe;
                 case "[Explicit]":
                     return Rating.Explicit;
+                case "[Unrated]":
+                    return Rating.Unrated;
                 default:
                     throw new FormatException($"Can't get rating from {rating}.");
             }

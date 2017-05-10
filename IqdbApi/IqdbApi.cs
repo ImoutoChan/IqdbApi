@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using IqdbApi.Exceptions;
 using IqdbApi.Models;
@@ -11,16 +12,29 @@ namespace IqdbApi
 {
     public class IqdbApi : IIqdbApi
     {
-        private static readonly string BaseAddress = @"https://iqdb.org/";
+        private static readonly int _waitSeconds = 5100;
+        private static readonly string _baseAddress = @"https://iqdb.org/";
+        private static readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1, 1);
 
         private readonly HttpClient _httpClient = new HttpClient();
 
         public IqdbApi()
         {
-            _httpClient.BaseAddress = new Uri(BaseAddress);
+            _httpClient.BaseAddress = new Uri(_baseAddress);
         }
 
-        public async Task<SearchResult> SearchUrl(string url)
+        private async Task<HttpClient> GetClient(CancellationToken cancellationToken)
+        {
+            await _httpClientSemaphoreSlim.WaitAsync(cancellationToken);
+
+            await Task.Delay(_waitSeconds, cancellationToken);
+
+            _httpClientSemaphoreSlim.Release();
+
+            return _httpClient;
+        }
+
+        public async Task<SearchResult> SearchUrl(string url, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (url == null)
             {
@@ -30,16 +44,19 @@ namespace IqdbApi
             {
                 throw new ArgumentException(nameof(url));
             }
+            
+            var client = await GetClient(cancellationToken);
 
-            var httpResponse = await _httpClient.GetAsync($"?url={url}");
+            var httpResponse = await client.GetAsync($"?url={url}", cancellationToken);
+
             httpResponse.EnsureSuccessStatusCode();
             var html = await httpResponse.Content.ReadAsStringAsync();
-            
+
             var parser = new SearchResultParser();
             return parser.Parse(html);
         }
 
-        public async Task<SearchResult> SearchFile(Stream fileStream)
+        public async Task<SearchResult> SearchFile(Stream fileStream, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (fileStream == null)
             {
@@ -67,8 +84,10 @@ namespace IqdbApi
             
             form.Add(new StreamContent(fileStream), "file", "image.jpg");
             form.Add(new StringContent(String.Empty), "url");
+            
 
-            var response = await _httpClient.PostAsync("/", form);
+            var client = await GetClient(cancellationToken);
+            var response = await client.PostAsync("/", form, cancellationToken);
 
             try
             {
