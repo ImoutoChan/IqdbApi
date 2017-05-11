@@ -14,7 +14,8 @@ namespace IqdbApi
     {
         private static readonly int _waitSeconds = 5100;
         private static readonly string _baseAddress = @"https://iqdb.org/";
-        private static readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1);
+        private static DateTimeOffset _lastRequestTime = DateTimeOffset.Now.AddDays(-1);
 
         private readonly HttpClient _httpClient = new HttpClient();
 
@@ -23,15 +24,27 @@ namespace IqdbApi
             _httpClient.BaseAddress = new Uri(_baseAddress);
         }
 
-        private async Task<HttpClient> GetClient(CancellationToken cancellationToken)
+        private async Task<T> UseClient<T>(Func<HttpClient, CancellationToken, Task<T>> action, CancellationToken cancellationToken = default(CancellationToken))
         {
             await _httpClientSemaphoreSlim.WaitAsync(cancellationToken);
 
-            await Task.Delay(_waitSeconds, cancellationToken);
+            var delayDuration = _waitSeconds - Convert.ToInt32((_lastRequestTime - DateTimeOffset.UtcNow).Duration().TotalMilliseconds);
 
-            _httpClientSemaphoreSlim.Release();
+            if (delayDuration > 0)
+            {
+                await Task.Delay(delayDuration, cancellationToken);
+            }
 
-            return _httpClient;
+            try
+            {
+                return await action(_httpClient, cancellationToken);
+            }
+            finally
+            {
+                _lastRequestTime = DateTimeOffset.UtcNow;
+                _httpClientSemaphoreSlim.Release();
+            }
+
         }
 
         public async Task<SearchResult> SearchUrl(string url, CancellationToken cancellationToken = default(CancellationToken))
@@ -45,9 +58,9 @@ namespace IqdbApi
                 throw new ArgumentException(nameof(url));
             }
             
-            var client = await GetClient(cancellationToken);
-
-            var httpResponse = await client.GetAsync($"?url={url}", cancellationToken);
+            
+            var httpResponse = await UseClient(async (httpClient, cT) => await httpClient.GetAsync($"?url={url}", cT),
+                                                cancellationToken);
 
             httpResponse.EnsureSuccessStatusCode();
             var html = await httpResponse.Content.ReadAsStringAsync();
@@ -67,27 +80,10 @@ namespace IqdbApi
                 throw new ImageTooLagreException();
             }
 
-
-            var form = new MultipartFormDataContent();
-
-            form.Add(new StringContent("8388608"), "MAX_FILE_SIZE");
-
-            for (int i = 1; i <= 13; i++)
-            {
-                if (new[] {7, 8, 9, 12}.Contains(i))
-                {
-                    continue;
-                }
-
-                form.Add(new StringContent(i.ToString()), "service[]");
-            }
+            var form = GetFromDataContent(fileStream);
             
-            form.Add(new StreamContent(fileStream), "file", "image.jpg");
-            form.Add(new StringContent(String.Empty), "url");
-            
-
-            var client = await GetClient(cancellationToken);
-            var response = await client.PostAsync("/", form, cancellationToken);
+            var response = await UseClient(async (httpClient, cT) => await httpClient.PostAsync("/", form, cT),
+                                           cancellationToken);
 
             try
             {
@@ -107,6 +103,28 @@ namespace IqdbApi
 
             var parser = new SearchResultParser();
             return parser.Parse(html);
+        }
+
+        private static MultipartFormDataContent GetFromDataContent(Stream fileStream)
+        {
+            var form = new MultipartFormDataContent();
+
+            form.Add(new StringContent("8388608"), "MAX_FILE_SIZE");
+
+            for (int i = 1; i <= 13; i++)
+            {
+                if (new[] { 7, 8, 9, 12 }.Contains(i))
+                {
+                    continue;
+                }
+
+                form.Add(new StringContent(i.ToString()), "service[]");
+            }
+
+            form.Add(new StreamContent(fileStream), "file", "image.jpg");
+            form.Add(new StringContent(String.Empty), "url");
+
+            return form;
         }
     }
 }
