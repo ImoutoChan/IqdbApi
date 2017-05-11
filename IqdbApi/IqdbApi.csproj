@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Description>Api library for searching images on iqdb.org</Description>
+    <Description>c# api library for searching images on iqdb.org</Description>
     <Copyright>(c) ImoutoChan</Copyright>
     <PackageProjectUrl>https://github.com/ImoutoChan/IqdbApi</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ImoutoChan/IqdbApi</RepositoryUrl>
