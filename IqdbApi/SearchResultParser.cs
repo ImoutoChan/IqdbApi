@@ -1,13 +1,15 @@
-﻿using System;
+﻿using AngleSharp.Dom;
+using AngleSharp.Dom.Html;
+using AngleSharp.Parser.Html;
+using IqdbApi.Enums;
+using IqdbApi.Exceptions;
+using IqdbApi.Models;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using HtmlAgilityPack;
-using IqdbApi.Enums;
-using IqdbApi.Exceptions;
-using IqdbApi.Models;
 using Match = IqdbApi.Models.Match;
 
 namespace IqdbApi
@@ -15,7 +17,7 @@ namespace IqdbApi
     internal class SearchResultParser
     {
         private readonly Regex _searchedStatsRegex = new Regex("[0-9,.]{2,}");
-        private readonly Regex _scoreRegex = new Regex("Score: (\\w+) ");
+        private readonly Regex _scoreRegex = new Regex("Score:\\s([\\d\\.]+)");
         private readonly Dictionary<string, Source> _sourceMapper = new Dictionary<string, Source>
             {
                 {"Danbooru ", Source.Danbooru},
@@ -32,8 +34,8 @@ namespace IqdbApi
 
         public SearchResult Parse(string html)
         {
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
+            var parser = new HtmlParser();
+            var doc = parser.Parse(html);
 
             CheckOnErrors(doc);
 
@@ -58,9 +60,9 @@ namespace IqdbApi
             }
         }
 
-        private void CheckOnErrors(HtmlDocument doc)
+        private void CheckOnErrors(IHtmlDocument doc)
         {
-            var errorString = doc.DocumentNode.SelectSingleNode("//*[@class=\"err\"]/text()[1]")?.InnerText;
+            var errorString = doc.DocumentElement.QuerySelector(".err")?.TextContent;
 
             if (String.IsNullOrWhiteSpace(errorString))
             {
@@ -85,12 +87,12 @@ namespace IqdbApi
             throw new InvalidFileFormatException("Unrecignized exception", new Exception(errorString));
         }
 
-        private (ImmutableList<Match> Matches, YourImage YourImage) GetMatches(HtmlDocument html)
+        private (ImmutableList<Match> Matches, YourImage YourImage) GetMatches(IHtmlDocument html)
         {
             var result = new List<Match>();
 
-            var mainResults = html.DocumentNode.SelectNodes("//*[@id=\"pages\"]/div").ToList();
-            var otherResults = html.DocumentNode.SelectNodes("//*[@id=\"more1\"]/div[2]/div").ToList();
+            var mainResults = html.DocumentElement.QuerySelectorAll("#pages > div").ToList();
+            var otherResults = html.DocumentElement.QuerySelectorAll("#more1 > div.pages > div").ToList();
 
             YourImage yourImage = null;
             bool isFirst = true;
@@ -98,7 +100,7 @@ namespace IqdbApi
             {
                 if (isFirst)
                 {
-                    yourImage = GetYourImage(match);
+                    yourImage = GetYourImage(match, html.DocumentElement);
 
                     isFirst = false;
                     continue;
@@ -125,21 +127,21 @@ namespace IqdbApi
             return (ImmutableList.Create(result.ToArray()), yourImage);
         }
 
-        private Match GetOtherMatch(HtmlNode match)
+        private Match GetOtherMatch(IElement match)
         {
             var newMatch = new Match();
 
             newMatch.MatchType = MatchType.Other;
-            newMatch.Url = match.SelectSingleNode("table/tr[1]/td/a")?.Attributes["href"]?.Value;
-            newMatch.PreviewUrl = match.SelectSingleNode("table/tr[1]/td/a/img")?.Attributes["src"]?.Value;
+            newMatch.Url = match.QuerySelector("tr:nth-child(1) > td > a")?.Attributes["href"]?.Value;
+            newMatch.PreviewUrl = match.QuerySelector("tr:nth-child(1) > td > a > img")?.Attributes["src"]?.Value;
 
-            var alt = match.SelectSingleNode("table/tr[1]/td/a/img")?.Attributes["alt"]?.Value;
+            var alt = match.QuerySelector("tr:nth-child(1) > td > a > img")?.Attributes["alt"]?.Value;
             newMatch.Score = GetScore(alt);
             newMatch.Tags = GetTags(alt);
 
-            newMatch.Source = GetSource(match.SelectSingleNode("table/tr[2]/td/text()").InnerText);
+            newMatch.Source = GetSource(match.QuerySelector("tr:nth-child(2) > td").ChildNodes[1].TextContent);
 
-            var resStrings = match.SelectSingleNode("table/tr[3]/td")?.InnerText?.Split(' ');
+            var resStrings = match.QuerySelector("tr:nth-child(3) > td")?.TextContent?.Split(' ');
             if (resStrings?.Length == 2)
             {
                 newMatch.Resolution = GetResolution(resStrings.First()).Value;
@@ -148,36 +150,36 @@ namespace IqdbApi
             newMatch.Rating = GetRating(resStrings.Last());
             
 
-            newMatch.Similarity = GetSimilarity(match.SelectSingleNode("table/tr[4]/td")?.InnerText);
+            newMatch.Similarity = GetSimilarity(match.QuerySelector("tr:nth-child(4) > td")?.TextContent);
 
             return newMatch;
         }
 
-        private Match GetMatch(HtmlNode match)
+        private Match GetMatch(IElement match)
         {
             var newMatch = new Match();
 
-            MatchType? matchType = GetMatchType(match.SelectSingleNode("table/tr[1]/th")?.InnerText);
+            MatchType? matchType = GetMatchType(match.QuerySelector("tr:nth-child(1) > th")?.TextContent);
             if (matchType == null)
             {
                 return null;
             }
 
             newMatch.MatchType = matchType.Value;
-            newMatch.Url = match.SelectSingleNode("table/tr[2]/td/a")?.Attributes["href"]?.Value;
-            newMatch.PreviewUrl = match.SelectSingleNode("table/tr[2]/td/a/img")?.Attributes["src"]?.Value;
+            newMatch.Url = match.QuerySelector("tr:nth-child(2) > td > a")?.Attributes["href"]?.Value;
+            newMatch.PreviewUrl = match.QuerySelector("tr:nth-child(2) > td > a > img")?.Attributes["src"]?.Value;
 
-            var alt = match.SelectSingleNode("table/tr[2]/td/a/img")?.Attributes["alt"]?.Value;
+            var alt = match.QuerySelector("tr:nth-child(2) > td > a > img")?.Attributes["alt"]?.Value;
             newMatch.Score = GetScore(alt);
             newMatch.Tags = GetTags(alt);
 
-            newMatch.Source = GetSource(match.SelectSingleNode("table/tr[3]/td/text()").InnerText);
+            newMatch.Source = GetSource(match.QuerySelector("tr:nth-child(3) > td").ChildNodes[1].TextContent);
 
-            var resStrings = match.SelectSingleNode("table/tr[4]/td")?.InnerText?.Split(' ');
+            var resStrings = match.QuerySelector("tr:nth-child(4) > td")?.TextContent?.Split(' ');
             newMatch.Resolution = GetResolution(resStrings.First()).Value;
             newMatch.Rating = GetRating(resStrings.Last());
 
-            newMatch.Similarity = GetSimilarity(match.SelectSingleNode("table/tr[5]/td")?.InnerText);
+            newMatch.Similarity = GetSimilarity(match.QuerySelector("tr:nth-child(5) > td")?.TextContent);
 
             return newMatch;
         }
@@ -286,22 +288,22 @@ namespace IqdbApi
             }
         }
 
-        private YourImage GetYourImage(HtmlNode match)
+        private YourImage GetYourImage(IElement element, IElement document)
         {
             var yourImage = new YourImage();
 
-            yourImage.PreviewUrl = match.SelectSingleNode("table/tr[2]/td/img")?.Attributes["src"]?.Value;
-            yourImage.Name = match.SelectSingleNode("table/tr[3]/td/span")?.Attributes["title"]?.Value;
+            yourImage.PreviewUrl = element.QuerySelector("tr:nth-child(2) > td > img")?.Attributes["src"]?.Value;
+            yourImage.Name = element.QuerySelector("tr:nth-child(3) > td > span")?.Attributes["title"]?.Value;
 
-            var resText = match.SelectSingleNode("table/tr[4]/td")?.InnerText;
+            var resText = element.QuerySelector("tr:nth-child(4) > td")?.TextContent;
             yourImage.Resolution = GetResolution(resText);
 
-            yourImage.Size = match.OwnerDocument.DocumentNode.SelectSingleNode("/html/body/div[1]")?.InnerText?.Split('(').Last().Split(')').First();
+            yourImage.Size = document.QuerySelector("body > div.notice")?.TextContent?.Split('(').Last().Split(')').First();
 
             return yourImage;
         }
 
-        private (double SearchInSeconds, int SearchedImagesCount) GetSearchStats(HtmlDocument html)
+        private (double SearchInSeconds, int SearchedImagesCount) GetSearchStats(IHtmlDocument html)
         {
             var matches = GetSearchStatsMatches(html);
 
@@ -328,10 +330,10 @@ namespace IqdbApi
             return (seconds, imageCount);
         }
 
-        private MatchCollection GetSearchStatsMatches(HtmlDocument html)
+        private MatchCollection GetSearchStatsMatches(IHtmlDocument html)
         {
-            var searchedStatsNode = html.DocumentNode.SelectSingleNode("/html/body/p[1]");
-            var searchedStatsText = searchedStatsNode?.InnerText;
+            var searchedStatsNode = html.QuerySelector("body > p");
+            var searchedStatsText = searchedStatsNode?.TextContent;
 
             if (String.IsNullOrWhiteSpace(searchedStatsText))
             {
@@ -342,9 +344,9 @@ namespace IqdbApi
             return matches;
         }
         
-        private SearchMoreInfo ParseSearchMoreInfo(HtmlDocument html)
+        private SearchMoreInfo ParseSearchMoreInfo(IHtmlDocument html)
         {
-            var searchMoreNode = html.DocumentNode.SelectSingleNode("//*[@id=\"yetmore\"]/");
+            var searchMoreNode = html.QuerySelector("#yetmore");
             var serachMoreLink = searchMoreNode?.Attributes["href"]?.Value;
 
             if (String.IsNullOrWhiteSpace(serachMoreLink))

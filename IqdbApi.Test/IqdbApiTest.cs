@@ -149,8 +149,7 @@ namespace IqdbApi.Test
             Assert.NotNull(result.YourImage);
             Assert.IsFalse(String.IsNullOrWhiteSpace(result.YourImage.Name));
             Assert.IsFalse(String.IsNullOrWhiteSpace(result.YourImage.PreviewUrl));
-            Assert.IsFalse(String.IsNullOrWhiteSpace(result.YourImage.Size));
-
+            
             foreach (var match in result.Matches)
             {
                 Assert.Greater(match.Similarity, 0);
