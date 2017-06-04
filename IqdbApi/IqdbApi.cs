@@ -12,7 +12,7 @@ namespace IqdbApi
 {
     public class IqdbApi : IIqdbApi
     {
-        private static readonly int _waitSeconds = 5100;
+        private static readonly int _waitMilliseconds = 5100;
         private static readonly string _baseAddress = @"https://iqdb.org/";
         private static readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1);
         private static DateTimeOffset _lastRequestTime = DateTimeOffset.Now.AddDays(-1);
@@ -28,7 +28,7 @@ namespace IqdbApi
         {
             await _httpClientSemaphoreSlim.WaitAsync(cancellationToken);
 
-            var delayDuration = _waitSeconds - Convert.ToInt32((_lastRequestTime - DateTimeOffset.UtcNow).Duration().TotalMilliseconds);
+            var delayDuration = _waitMilliseconds - Convert.ToInt32((_lastRequestTime - DateTimeOffset.UtcNow).Duration().TotalMilliseconds);
 
             if (delayDuration > 0)
             {

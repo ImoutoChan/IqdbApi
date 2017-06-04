@@ -185,7 +185,7 @@ namespace IqdbApi.Test
             fs.Dispose();
         }
 
-        [Test()]
+        [Test]
         public async Task RateLimiter()
         {
             async Task<DateTimeOffset> GetImage(string url)
