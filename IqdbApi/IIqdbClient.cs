@@ -5,7 +5,7 @@ using IqdbApi.Models;
 
 namespace IqdbApi
 {
-    public interface IIqdbApi
+    public interface IIqdbClient
     {
         /// <summary>
         /// Search images by web url.

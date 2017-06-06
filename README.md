@@ -12,7 +12,7 @@ C# library for searching images on [iqdb.org](https://iqdb.org)
 ```C#
 static async void Run()
 {
-    IIqdbApi api = new IqdbApi();
+    IIqdbClient api = new IqdbClient();
     using (var fs = new FileStream("imageToSearch.jpg", FileMode.Open))
     {
         var searchResults = await api.SearchFile(fs);

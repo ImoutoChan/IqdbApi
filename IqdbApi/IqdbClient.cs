@@ -10,7 +10,7 @@ using IqdbApi.Models;
 
 namespace IqdbApi
 {
-    public class IqdbApi : IIqdbApi
+    public class IqdbClient : IIqdbClient
     {
         private static readonly int _waitMilliseconds = 5100;
         private static readonly string _baseAddress = @"https://iqdb.org/";
@@ -19,7 +19,7 @@ namespace IqdbApi
 
         private readonly HttpClient _httpClient = new HttpClient();
 
-        public IqdbApi()
+        public IqdbClient()
         {
             _httpClient.BaseAddress = new Uri(_baseAddress);
         }

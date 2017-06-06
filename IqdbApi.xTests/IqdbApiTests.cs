@@ -37,7 +37,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             {
                 var url = "https://pp.userapi.com/c639830/v639830431/11db4/peMZxfCdiko.jpg";
 
-                IIqdbApi api = new IqdbApi();
+                IIqdbClient api = new IqdbClient();
 
                 var result = await api.SearchUrl(url);
 
@@ -61,7 +61,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             {
                 var url = "https://pp.userapi.com/c626224/v626224431/6291e/z3mBzT9q104.jpg";
 
-                IIqdbApi api = new IqdbApi();
+                IIqdbClient api = new IqdbClient();
 
                 var result = await api.SearchUrl(url);
 
@@ -83,7 +83,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             [MemberData(nameof(WillDoGeneralSearchTestSource))]
             public async Task WillDoGeneralSearch(string url)
             {
-                IIqdbApi api = new IqdbApi();
+                IIqdbClient api = new IqdbClient();
 
                 var result = await api.SearchUrl(url);
 
@@ -112,7 +112,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             [Fact]
             public async Task WillThrowExceptions()
             {
-                IIqdbApi api = new IqdbApi();
+                IIqdbClient api = new IqdbClient();
                 
                 await Assert.ThrowsAsync<NotImageException>(() => 
                     api.SearchUrl("https://yande.re/favicon.ico"));
@@ -149,7 +149,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             {
                 async Task<DateTimeOffset> GetImage(string url)
                 {
-                    var api = new IqdbApi();
+                    var api = new IqdbClient();
                     var result = await api.SearchUrl(url);
                     return DateTimeOffset.UtcNow;
                 }
@@ -201,7 +201,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             [InlineData("Resources/9cc122fe5884a090d1dfe6832b8ed19f.jpg")]
             public async Task WillFindMatches(string filename)
             {
-                IIqdbApi api = new IqdbApi();
+                IIqdbClient api = new IqdbClient();
                 SearchResult result;
 
                 using (var fs = new FileStream(filename, FileMode.Open))
@@ -236,7 +236,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             [Fact]
             public async Task WillThrowExceptions()
             {
-                IIqdbApi api = new IqdbApi();
+                IIqdbClient api = new IqdbClient();
                 
 
                 using (var fs = new FileStream("Resources/favicon.ico", FileMode.Open))
