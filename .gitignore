@@ -2,3 +2,5 @@ IqdbApi/obj/
 IqdbApi.Test/obj/
 IqdbApi.Test/bin/
 IqdbApi/bin/
+/IqdbApi.xTests/bin
+IqdbApi.xTests/obj/
