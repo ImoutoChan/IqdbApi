@@ -46,8 +46,8 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
 
                 Assert.NotNull(result.Matches);
                 Assert.True(result.Matches.Count(match => match.MatchType == MatchType.Other) >= 14);
-                Assert.Equal(result.Matches.Count(match => match.MatchType == MatchType.Additional), 1);
-                Assert.Equal(result.Matches.Count(match => match.MatchType == MatchType.Best), 1);
+                Assert.Equal(1, result.Matches.Count(match => match.MatchType == MatchType.Additional));
+                Assert.Equal(1, result.Matches.Count(match => match.MatchType == MatchType.Best));
 
                 AssertSearchStats(result);
 
@@ -69,8 +69,8 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                 Assert.False(result.IsFound);
 
                 Assert.NotNull(result.Matches);
-                Assert.Equal(result.Matches.Count(match => match.MatchType == MatchType.Additional), 0);
-                Assert.Equal(result.Matches.Count(match => match.MatchType == MatchType.Best), 0);
+                Assert.Equal(0, result.Matches.Count(match => match.MatchType == MatchType.Additional));
+                Assert.Equal(0, result.Matches.Count(match => match.MatchType == MatchType.Best));
 
                 AssertSearchStats(result);
 
@@ -94,12 +94,12 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                 {
                     Assert.True(result.Matches.Count(match => match.MatchType == MatchType.Other) >= 0);
                     Assert.True(result.Matches.Count(match => match.MatchType == MatchType.Additional) >= 0);
-                    Assert.Equal(result.Matches.Count(match => match.MatchType == MatchType.Best), 1);
+                    Assert.Equal(1, result.Matches.Count(match => match.MatchType == MatchType.Best));
                 }
                 else
                 {
-                    Assert.Equal(result.Matches.Count(match => match.MatchType == MatchType.Additional), 0);
-                    Assert.Equal(result.Matches.Count(match => match.MatchType == MatchType.Best), 0);
+                    Assert.Equal(0, result.Matches.Count(match => match.MatchType == MatchType.Additional));
+                    Assert.Equal(0, result.Matches.Count(match => match.MatchType == MatchType.Best));
                 }
 
                 AssertSearchStats(result);
@@ -226,7 +226,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                 foreach (var match in result.Matches)
                 {
                     Assert.True(match.Similarity > 0);
-                    Assert.NotEqual(match.Resolution, default(Resolution));
+                    Assert.NotEqual(default(Resolution), match.Resolution);
 
                     Assert.False(String.IsNullOrWhiteSpace(match.PreviewUrl));
                     Assert.False(String.IsNullOrWhiteSpace(match.Url));
