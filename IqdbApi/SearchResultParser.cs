@@ -260,7 +260,7 @@ namespace IqdbApi
                 return null;
             }
 
-            var score = scoreMatch?.Groups[1]?.Captures[0]?.ToString();
+            var score = scoreMatch.Groups[1]?.Captures[0]?.ToString();
 
             if (score == null 
                 || !Byte.TryParse(score, NumberStyles.Any, CultureInfo.InvariantCulture, out byte scoreByte))
@@ -356,10 +356,12 @@ namespace IqdbApi
 
             var args = serachMoreLink.Split('&').ToDictionary(x => x.Split('=').First(), y => y.Split('=').Last());
 
-            var searchMoreInfo = new SearchMoreInfo();
+            var searchMoreInfo = new SearchMoreInfo
+            {
+                Original = args["org"],
+                Thumb = args["thu"]
+            };
 
-            searchMoreInfo.Original = args["org"];
-            searchMoreInfo.Thumb = args["thu"];
 
             return searchMoreInfo;
 
