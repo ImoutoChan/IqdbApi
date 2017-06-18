@@ -1,16 +1,19 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using IqdbApi.Enums;
 using IqdbApi.Exceptions;
 using IqdbApi.Models;
+using RichardSzalay.MockHttp;
 using Xunit;
 
 namespace IqdbApi.xTests.IqdbApiTestContainer
 {
-    public class IqdbApiRealTests
+    public class IqdbApiMockTests
     {
         public class TheSearchUrlMethod : IqdbApiRealTests
         {
@@ -29,7 +32,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                     "https://cs541604.userapi.com/c836722/v836722677/342ba/JKnecCszdCM.jpg"
                 };
 
-                return urls.Select(x => new[] {x});
+                return urls.Select(x => new[] { x });
             }
 
             [Fact]
@@ -37,7 +40,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             {
                 var url = "https://pp.userapi.com/c639830/v639830431/11db4/peMZxfCdiko.jpg";
 
-                IIqdbClient api = new IqdbClient();
+                var api = GetIqdbClient();
 
                 var result = await api.SearchUrl(url);
 
@@ -45,13 +48,17 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                 Assert.True(result.IsFound);
 
                 Assert.NotNull(result.Matches);
-                Assert.True(result.Matches.Count(match => match.MatchType == MatchType.Other) >= 14);
+                Assert.Equal(16, result.Matches.Count);
                 Assert.Equal(1, result.Matches.Count(match => match.MatchType == MatchType.Additional));
                 Assert.Equal(1, result.Matches.Count(match => match.MatchType == MatchType.Best));
+                Assert.Equal(14, result.Matches.Count(match => match.MatchType == MatchType.Other));
 
                 AssertSearchStats(result);
 
-                AssertYourImage(result);
+                Assert.NotNull(result.YourImage);
+                Assert.Equal("peMZxfCdiko.jpg", result.YourImage.Name);
+                Assert.False(String.IsNullOrWhiteSpace(result.YourImage.PreviewUrl));
+                Assert.Equal("13 KB", result.YourImage.Size);
 
                 AssertMatches(result);
             }
@@ -60,8 +67,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             public async Task WillNotFindMatches()
             {
                 var url = "https://pp.userapi.com/c626224/v626224431/6291e/z3mBzT9q104.jpg";
-
-                IIqdbClient api = new IqdbClient();
+                var api = GetIqdbClient();
 
                 var result = await api.SearchUrl(url);
 
@@ -83,7 +89,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             [MemberData(nameof(WillDoGeneralSearchTestSource))]
             public async Task WillDoGeneralSearch(string url)
             {
-                IIqdbClient api = new IqdbClient();
+                var api = GetIqdbClient();
 
                 var result = await api.SearchUrl(url);
 
@@ -112,34 +118,34 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             [Fact]
             public async Task WillThrowExceptions()
             {
-                IIqdbClient api = new IqdbClient();
-                
-                await Assert.ThrowsAsync<NotImageException>(() => 
+                var api = GetIqdbClient();
+
+                await Assert.ThrowsAsync<NotImageException>(() =>
                     api.SearchUrl("https://yande.re/favicon.ico"));
 
-                await Assert.ThrowsAsync<NotImageException>(() => 
+                await Assert.ThrowsAsync<NotImageException>(() =>
                     api.SearchUrl("https://iqdb.org/default.css"));
 
-                await Assert.ThrowsAsync<ArgumentException>(() => 
+                await Assert.ThrowsAsync<ArgumentException>(() =>
                     api.SearchUrl(""));
 
-                await Assert.ThrowsAsync<ArgumentException>(() => 
+                await Assert.ThrowsAsync<ArgumentException>(() =>
                     api.SearchUrl("  "));
 
-                await Assert.ThrowsAsync<ArgumentNullException>(() => 
+                await Assert.ThrowsAsync<ArgumentNullException>(() =>
                     api.SearchUrl(null));
 
 
                 // http failed
-                await Assert.ThrowsAsync<HttpRequestFailed>(() => 
-                    api.SearchUrl(" afsdfqewr1234 "));
+                await Assert.ThrowsAsync<HttpRequestFailed>(() =>
+                    api.SearchUrl("asdfasgsdf"));
 
                 // size
-                await Assert.ThrowsAsync<ImageTooLagreException>(() => 
+                await Assert.ThrowsAsync<ImageTooLagreException>(() =>
                     api.SearchUrl("https://files.yande.re/image/8f8c1f35e4ca613487dda4ea2d282077/yande.re%20377441%20armor%20bodysuit%20gun%20heroes_of_the_storm%20mecha%20monster%20overwatch%20sword%20tattoo%20tracer%20weapon%20zarya.jpg"));
 
                 // resolution
-                await Assert.ThrowsAsync<ImageTooLagreException>(() => 
+                await Assert.ThrowsAsync<ImageTooLagreException>(() =>
                     api.SearchUrl("https://files.yande.re/image/cd73e77b015a257fa807afdc3043cbc0/yande.re%20277274%20aoki_hagane_no_arpeggio%20ass%20bikini%20morita_kazuaki%20panty_pull%20stick_poster%20swimsuits%20takao_%28aoki_hagane_no_arpeggio%29.jpg"));
 
             }
@@ -149,7 +155,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             {
                 async Task<DateTimeOffset> GetImage(string url)
                 {
-                    var api = new IqdbClient();
+                    var api = GetIqdbClient();
                     var result = await api.SearchUrl(url);
                     return DateTimeOffset.UtcNow;
                 }
@@ -163,7 +169,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                     "https://pp.userapi.com/c636425/v636425431/4d13c/R20-IOXNFds.jpg"
                 };
 
-                var tasks = urls.Select(url => GetImage(url)).ToArray();
+                var tasks = urls.Select(GetImage).ToArray();
 
 
                 var startTime = DateTimeOffset.UtcNow;
@@ -237,7 +243,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             public async Task WillThrowExceptions()
             {
                 IIqdbClient api = new IqdbClient();
-                
+
 
                 using (var fs = new FileStream("Resources/favicon.ico", FileMode.Open))
                 {
@@ -280,6 +286,21 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
         {
             Assert.True(result.SearchedImagesCount > 0);
             Assert.True(result.SearchedInSeconds > 0);
+        }
+
+        private static IIqdbClient GetIqdbClient() => new IqdbClient(GetHttpHandlerMock());
+
+        private static MockHttpMessageHandler GetHttpHandlerMock()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+
+            foreach (var urlRespone in IqdbHttpResponsesMock.UrlResponses)
+            {
+                mockHttp.When(urlRespone.Key)
+                    .Respond(HttpStatusCode.OK, new StringContent(urlRespone.Value));
+            }
+
+            return mockHttp;
         }
     }
 }

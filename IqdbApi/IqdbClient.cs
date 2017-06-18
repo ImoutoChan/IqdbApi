@@ -17,10 +17,13 @@ namespace IqdbApi
         private static readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1);
         private static DateTimeOffset _lastRequestTime = DateTimeOffset.Now.AddDays(-1);
 
-        private readonly HttpClient _httpClient = new HttpClient();
+        private readonly HttpClient _httpClient;
 
-        public IqdbClient()
+        public IqdbClient(HttpMessageHandler httpMessageHendler = null)
         {
+            var handler = httpMessageHendler ?? new HttpClientHandler();
+
+            _httpClient = new HttpClient(handler);
             _httpClient.BaseAddress = new Uri(_baseAddress);
         }
 
