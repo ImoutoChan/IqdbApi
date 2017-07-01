@@ -176,9 +176,14 @@ namespace IqdbApi
             newMatch.Source = GetSource(match.QuerySelector("tr:nth-child(3) > td").ChildNodes[1].TextContent);
 
             var resStrings = match.QuerySelector("tr:nth-child(4) > td")?.TextContent?.Split(' ');
-            newMatch.Resolution = GetResolution(resStrings.First()).Value;
-            newMatch.Rating = GetRating(resStrings.Last());
-
+            if (resStrings != null)
+            {
+                if (resStrings.Length == 2)
+                {
+                    newMatch.Resolution = GetResolution(resStrings.First()).Value;
+                }
+                newMatch.Rating = GetRating(resStrings.Last());
+            }
             newMatch.Similarity = GetSimilarity(match.QuerySelector("tr:nth-child(5) > td")?.TextContent);
 
             return newMatch;
