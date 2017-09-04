@@ -9,6 +9,7 @@ using IqdbApi.Enums;
 using IqdbApi.Exceptions;
 using IqdbApi.Models;
 using RichardSzalay.MockHttp;
+using RichardSzalay.MockHttp.Matchers;
 using Xunit;
 
 namespace IqdbApi.xTests.IqdbApiTestContainer
@@ -207,7 +208,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             [InlineData("Resources/9cc122fe5884a090d1dfe6832b8ed19f.jpg")]
             public async Task WillFindMatches(string filename)
             {
-                IIqdbClient api = new IqdbClient();
+                IIqdbClient api = GetIqdbClient();
                 SearchResult result;
 
                 using (var fs = new FileStream(filename, FileMode.Open))
@@ -294,12 +295,19 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
         {
             var mockHttp = new MockHttpMessageHandler();
 
-            foreach (var urlRespone in IqdbHttpResponsesMock.UrlResponses)
+            foreach (var urlRespone in IqdbHttpResponsesMock.GetResponses)
             {
                 mockHttp.When(urlRespone.Key)
                     .Respond(HttpStatusCode.OK, new StringContent(urlRespone.Value));
             }
 
+            foreach (var urlRespone in IqdbHttpResponsesMock.PostResponses)
+            {
+                mockHttp.When(HttpMethod.Post, "https://iqdb.org")
+                    .With(new CustomMatcher(x => x.Content == urlRespone.Content))
+                    .Respond(HttpStatusCode.OK, new StringContent(urlRespone.Response));
+            }
+            
             return mockHttp;
         }
     }

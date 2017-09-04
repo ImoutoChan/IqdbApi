@@ -1,10 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
 
 namespace IqdbApi.xTests.IqdbApiTestContainer
 {
     public class IqdbHttpResponsesMock
     {
-        public static readonly Dictionary<string, string> UrlResponses = new Dictionary<string, string>
+        public class PostResponse
+        {
+            public string File { get; set; }
+
+            public MultipartFormDataContent Content { get; set; }
+
+            public string Response { get; set; }
+        }
+
+        public static Dictionary<string, string> GetResponses { get; } = new Dictionary<string, string>
         {
             {
                 "https://iqdb.org/?url=https://pp.userapi.com/c639830/v639830431/11db4/peMZxfCdiko.jpg",
@@ -1645,5 +1659,60 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
 "
             }
         };
+
+        public static Dictionary<string, string> FileResponses { get; } = new Dictionary<string, string>
+        {
+            { "Resources/9cc122fe5884a090d1dfe6832b8ed19f.jpg", @"" },
+            { "Resources/favicon.ico", @"" },
+            { "Resources/large.jpg", @"" }
+        };
+
+        public static List<PostResponse> PostResponses { get; }
+
+        static IqdbHttpResponsesMock()
+        {
+            PostResponses = new List<PostResponse>();
+
+            var postResponse = new PostResponse
+            {
+                File = "Resources/9cc122fe5884a090d1dfe6832b8ed19f.jpg"
+            };
+            using (var fs = new FileStream(postResponse.File, FileMode.Open))
+            {
+                postResponse.Content = GetFromDataContent(fs);
+            }
+            postResponse.Response = @"asdfsdf";
+
+            PostResponses.Add(postResponse);
+
+            var urls = new[]
+            {
+                "Resources/9cc122fe5884a090d1dfe6832b8ed19f.jpg",
+                "Resources/favicon.ico",
+                "Resources/large.jpg"
+            };
+        }
+
+        private static MultipartFormDataContent GetFromDataContent(Stream fileStream)
+        {
+            var form = new MultipartFormDataContent();
+
+            form.Add(new StringContent("8388608"), "MAX_FILE_SIZE");
+
+            for (int i = 1; i <= 13; i++)
+            {
+                if (((IList)new[] {7, 8, 9, 12}).Contains(i))
+                {
+                    continue;
+                }
+
+                form.Add(new StringContent(i.ToString()), "service[]");
+            }
+
+            form.Add(new StreamContent(fileStream), "file", "image.jpg");
+            form.Add(new StringContent(String.Empty), "url");
+
+            return form;
+        }
     }
 }
