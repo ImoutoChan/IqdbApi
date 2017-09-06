@@ -7,11 +7,19 @@ using IqdbApi.Enums;
 using IqdbApi.Exceptions;
 using IqdbApi.Models;
 using Xunit;
+using Xunit.Sdk;
 
 namespace IqdbApi.xTests.IqdbApiTestContainer
 {
-    public class IqdbApiRealTests
+    public class IqdbApiRealTests : IClassFixture<IqdbClientFixture>
     {
+        private readonly IqdbClientFixture _iqdbClientFixture;
+
+        public IqdbApiRealTests(IqdbClientFixture iqdbClientFixture)
+        {
+            _iqdbClientFixture = iqdbClientFixture;
+        }
+
         public class TheSearchUrlMethod : IqdbApiRealTests
         {
             public static IEnumerable<object[]> WillDoGeneralSearchTestSource()
@@ -37,7 +45,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             {
                 var url = "https://pp.userapi.com/c639830/v639830431/11db4/peMZxfCdiko.jpg";
 
-                IIqdbClient api = new IqdbClient();
+                var api = _iqdbClientFixture.GetIqdbClient();
 
                 var result = await api.SearchUrl(url);
 
@@ -61,7 +69,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             {
                 var url = "https://pp.userapi.com/c626224/v626224431/6291e/z3mBzT9q104.jpg";
 
-                IIqdbClient api = new IqdbClient();
+                var api = _iqdbClientFixture.GetIqdbClient();
 
                 var result = await api.SearchUrl(url);
 
@@ -83,7 +91,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             [MemberData(nameof(WillDoGeneralSearchTestSource))]
             public async Task WillDoGeneralSearch(string url)
             {
-                IIqdbClient api = new IqdbClient();
+                var api = _iqdbClientFixture.GetIqdbClient();
 
                 var result = await api.SearchUrl(url);
 
@@ -112,8 +120,8 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             [Fact]
             public async Task WillThrowExceptions()
             {
-                IIqdbClient api = new IqdbClient();
-                
+                var api = _iqdbClientFixture.GetIqdbClient();
+
                 await Assert.ThrowsAsync<NotImageException>(() => 
                     api.SearchUrl("https://yande.re/favicon.ico"));
 
@@ -144,12 +152,12 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
 
             }
 
-            [Fact]
+            [Fact(Skip = "Will be tested in mocked")]
             public async Task WillPauseOnSeveralRequests()
             {
                 async Task<DateTimeOffset> GetImage(string url)
                 {
-                    var api = new IqdbClient();
+                    var api = _iqdbClientFixture.GetIqdbClient();
                     var result = await api.SearchUrl(url);
                     return DateTimeOffset.UtcNow;
                 }
@@ -163,7 +171,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                     "https://pp.userapi.com/c636425/v636425431/4d13c/R20-IOXNFds.jpg"
                 };
 
-                var tasks = urls.Select(url => GetImage(url)).ToArray();
+                var tasks = urls.Select(GetImage).ToArray();
 
 
                 var startTime = DateTimeOffset.UtcNow;
@@ -193,6 +201,10 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                     }
                 }
             }
+
+            public TheSearchUrlMethod(IqdbClientFixture iqdbClientFixture) : base(iqdbClientFixture)
+            {
+            }
         }
 
         public class TheSearchFileMethod : IqdbApiRealTests
@@ -201,7 +213,8 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             [InlineData("Resources/9cc122fe5884a090d1dfe6832b8ed19f.jpg")]
             public async Task WillFindMatches(string filename)
             {
-                IIqdbClient api = new IqdbClient();
+                var api = _iqdbClientFixture.GetIqdbClient();
+
                 SearchResult result;
 
                 using (var fs = new FileStream(filename, FileMode.Open))
@@ -236,7 +249,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             [Fact]
             public async Task WillThrowExceptions()
             {
-                IIqdbClient api = new IqdbClient();
+                var api = _iqdbClientFixture.GetIqdbClient();
                 
 
                 using (var fs = new FileStream("Resources/favicon.ico", FileMode.Open))
@@ -254,6 +267,10 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                     await Assert.ThrowsAsync<ImageTooLagreException>(() =>
                         api.SearchFile(fs));
                 }
+            }
+
+            public TheSearchFileMethod(IqdbClientFixture iqdbClientFixture) : base(iqdbClientFixture)
+            {
             }
         }
 
