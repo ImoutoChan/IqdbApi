@@ -12,26 +12,31 @@ namespace IqdbApi
 {
     public class IqdbClient : IIqdbClient
     {
-        private static readonly int _waitMilliseconds = 5100;
-        private static readonly string _baseAddress = @"https://iqdb.org/";
-        private static readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1);
-        private static DateTimeOffset _lastRequestTime = DateTimeOffset.Now.AddDays(-1);
+        private readonly int _waitMilliseconds;
+        private const string _baseAddress = @"https://iqdb.org/";
+        private readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1);
+        private DateTimeOffset _lastRequestTime = DateTimeOffset.Now.AddDays(-1);
 
         private readonly HttpClient _httpClient;
 
-        public IqdbClient(HttpMessageHandler httpMessageHendler = null)
+        public IqdbClient(HttpMessageHandler httpMessageHendler = null, int waitMilliseconds = 5100)
         {
             var handler = httpMessageHendler ?? new HttpClientHandler();
 
             _httpClient = new HttpClient(handler);
             _httpClient.BaseAddress = new Uri(_baseAddress);
+
+            _waitMilliseconds = waitMilliseconds;
         }
 
-        private async Task<T> UseClient<T>(Func<HttpClient, CancellationToken, Task<T>> action, CancellationToken cancellationToken = default(CancellationToken))
+        private async Task<T> UseClient<T>(Func<HttpClient, CancellationToken, Task<T>> action, 
+                                           CancellationToken cancellationToken = default(CancellationToken))
         {
             await _httpClientSemaphoreSlim.WaitAsync(cancellationToken);
 
-            var delayDuration = _waitMilliseconds - Convert.ToInt32((_lastRequestTime - DateTimeOffset.UtcNow).Duration().TotalMilliseconds);
+            var timePassed = _lastRequestTime - DateTimeOffset.UtcNow;
+            var timePassedMilliseconds = timePassed.Duration().TotalMilliseconds;
+            var delayDuration = _waitMilliseconds - Convert.ToInt32(timePassedMilliseconds);
 
             if (delayDuration > 0)
             {
@@ -50,7 +55,8 @@ namespace IqdbApi
 
         }
 
-        public async Task<SearchResult> SearchUrl(string url, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<SearchResult> SearchUrl(string url, 
+                                                  CancellationToken cancellationToken = default(CancellationToken))
         {
             if (url == null)
             {
@@ -63,7 +69,7 @@ namespace IqdbApi
             
             
             var httpResponse = await UseClient(async (httpClient, cT) => await httpClient.GetAsync($"?url={url}", cT),
-                                                cancellationToken);
+                                               cancellationToken);
 
             httpResponse.EnsureSuccessStatusCode();
             var html = await httpResponse.Content.ReadAsStringAsync();
@@ -72,7 +78,8 @@ namespace IqdbApi
             return parser.Parse(html);
         }
 
-        public async Task<SearchResult> SearchFile(Stream fileStream, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<SearchResult> SearchFile(Stream fileStream, 
+                                                   CancellationToken cancellationToken = default(CancellationToken))
         {
             if (fileStream == null)
             {
@@ -128,6 +135,12 @@ namespace IqdbApi
             form.Add(new StringContent(String.Empty), "url");
 
             return form;
+        }
+
+        public void Dispose()
+        {
+            _httpClientSemaphoreSlim?.Dispose();
+            _httpClient?.Dispose();
         }
     }
 }
