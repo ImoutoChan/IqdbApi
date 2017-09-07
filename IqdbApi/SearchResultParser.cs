@@ -37,19 +37,19 @@ namespace IqdbApi
             var parser = new HtmlParser();
             var doc = parser.Parse(html);
 
-            CheckOnErrors(doc);
+            EnsureSuccess(doc.DocumentElement);
 
             try
             {
                 var searchStats = GetSearchStats(doc);
-                var matches = GetMatches(doc);
+                var matches = GetMatches(doc.DocumentElement);
 
                 var searchResult = new SearchResult
                 {
                     SearchedInSeconds = searchStats.SearchInSeconds,
                     SearchedImagesCount = searchStats.SearchedImagesCount,
                     YourImage = matches.YourImage,
-                    Matches = matches.Matches
+                    Matches = ImmutableList.Create(matches.Matches.ToArray())
                 };
 
                 return searchResult;
@@ -60,9 +60,9 @@ namespace IqdbApi
             }
         }
 
-        private void CheckOnErrors(IHtmlDocument doc)
+        private void EnsureSuccess(IElement documentNode)
         {
-            var errorString = doc.DocumentElement.QuerySelector(".err")?.TextContent;
+            var errorString = documentNode.QuerySelector(".err")?.TextContent;
 
             if (String.IsNullOrWhiteSpace(errorString))
             {
@@ -87,45 +87,26 @@ namespace IqdbApi
             throw new InvalidFileFormatException("Unrecignized exception", new Exception(errorString));
         }
 
-        private (ImmutableList<Match> Matches, YourImage YourImage) GetMatches(IHtmlDocument html)
+        private (List<Match> Matches, YourImage YourImage) GetMatches(IElement documentNode)
         {
-            var result = new List<Match>();
+            var mainResults = documentNode.QuerySelectorAll("#pages > div").ToList();
 
-            var mainResults = html.DocumentElement.QuerySelectorAll("#pages > div").ToList();
-            var otherResults = html.DocumentElement.QuerySelectorAll("#more1 > div.pages > div").ToList();
+            var yourImageElement = mainResults.First();
+            var yourImage = GetYourImage(yourImageElement, documentNode);
+            mainResults.Remove(yourImageElement);
 
-            YourImage yourImage = null;
-            bool isFirst = true;
-            foreach (var match in mainResults)
-            {
-                if (isFirst)
-                {
-                    yourImage = GetYourImage(match, html.DocumentElement);
+            var mainMatches = GetMainMatches(mainResults);
 
-                    isFirst = false;
-                    continue;
-                }
-
-                var newMatch = GetMatch(match);
-
-                if (newMatch == null)
-                {
-                    continue;
-                }
-
-                result.Add(newMatch);
-            }
-
-            foreach (var match in otherResults)
-            {
-
-                Match newMatch = GetOtherMatch(match);
-
-                result.Add(newMatch);
-            }
-
-            return (ImmutableList.Create(result.ToArray()), yourImage);
+            var otherMatches = GetOtherMatches(documentNode);
+            
+            return (mainMatches.Union(otherMatches).ToList(), yourImage);
         }
+
+        private IEnumerable<Match> GetMainMatches(IEnumerable<IElement> matchElements) 
+            => matchElements.Select(GetMatch).Where(x => x != null);
+
+        private IEnumerable<Match> GetOtherMatches(IElement documentNode)
+            => documentNode.QuerySelectorAll("#more1 > div.pages > div").Select(GetOtherMatch);
 
         private Match GetOtherMatch(IElement match)
         {
@@ -159,7 +140,8 @@ namespace IqdbApi
         {
             var newMatch = new Match();
 
-            MatchType? matchType = GetMatchType(match.QuerySelector("tr:nth-child(1) > th")?.TextContent);
+            var matchTypeText = match.QuerySelector("tr:nth-child(1) > th")?.TextContent;
+            MatchType? matchType = GetMatchType(matchTypeText);
             if (matchType == null)
             {
                 return null;
@@ -169,9 +151,9 @@ namespace IqdbApi
             newMatch.Url = match.QuerySelector("tr:nth-child(2) > td > a")?.Attributes["href"]?.Value;
             newMatch.PreviewUrl = match.QuerySelector("tr:nth-child(2) > td > a > img")?.Attributes["src"]?.Value;
 
-            var alt = match.QuerySelector("tr:nth-child(2) > td > a > img")?.Attributes["alt"]?.Value;
-            newMatch.Score = GetScore(alt);
-            newMatch.Tags = GetTags(alt);
+            var imageAlt = match.QuerySelector("tr:nth-child(2) > td > a > img")?.Attributes["alt"]?.Value;
+            newMatch.Score = GetScore(imageAlt);
+            newMatch.Tags = GetTags(imageAlt);
 
             newMatch.Source = GetSource(match.QuerySelector("tr:nth-child(3) > td").ChildNodes[1].TextContent);
 
@@ -271,9 +253,9 @@ namespace IqdbApi
             return scoreByte;
         }
 
-        private MatchType? GetMatchType(string innerText)
+        private MatchType? GetMatchType(string matchTypeText)
         {
-            switch (innerText)
+            switch (matchTypeText)
             {
                 case "No relevant matches":
                     return null;
@@ -284,7 +266,7 @@ namespace IqdbApi
                 case "Possible match":
                     return MatchType.Possible;
                 default:
-                    throw new FormatException($"Match type {innerText} is not supported.");
+                    throw new FormatException($"Match type {matchTypeText} is not supported.");
             }
         }
 
