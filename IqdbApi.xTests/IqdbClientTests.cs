@@ -152,7 +152,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
 
             }
 
-            [Fact(Skip = "Will be tested in mocked")]
+            [Fact(Skip = "Will be tested in mock tests")]
             public async Task WillPauseOnSeveralRequests()
             {
                 async Task<DateTimeOffset> GetImage(string url)

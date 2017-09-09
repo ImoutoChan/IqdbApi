@@ -75,7 +75,7 @@ namespace IqdbApi
             var html = await httpResponse.Content.ReadAsStringAsync();
 
             var parser = new SearchResultParser();
-            return parser.Parse(html);
+            return parser.ParseResult(html);
         }
 
         public async Task<SearchResult> SearchFile(Stream fileStream, 
@@ -112,7 +112,7 @@ namespace IqdbApi
             var html = await response.Content.ReadAsStringAsync();
 
             var parser = new SearchResultParser();
-            return parser.Parse(html);
+            return parser.ParseResult(html);
         }
 
         private static MultipartFormDataContent GetFromDataContent(Stream fileStream)

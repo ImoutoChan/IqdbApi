@@ -1,5 +1,4 @@
 ﻿using AngleSharp.Dom;
-using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using IqdbApi.Enums;
 using IqdbApi.Exceptions;
@@ -29,20 +28,19 @@ namespace IqdbApi
                 {"The Anime Gallery", Source.TheAnimeGallery},
                 {"yande.re", Source.Yandere},
                 {"Zerochan", Source.Zerochan}
-
             };
 
-        public SearchResult Parse(string html)
+        public SearchResult ParseResult(string html)
         {
             var parser = new HtmlParser();
-            var doc = parser.Parse(html);
-
-            EnsureSuccess(doc.DocumentElement);
+            var rootElement = parser.Parse(html).DocumentElement;
+            
+            ThrowIfIqdbError(rootElement);
 
             try
             {
-                var searchStats = GetSearchStats(doc);
-                var matches = GetMatches(doc.DocumentElement);
+                var searchStats = GetSearchStats(rootElement);
+                var matches = GetMatches(rootElement);
 
                 var searchResult = new SearchResult
                 {
@@ -60,7 +58,7 @@ namespace IqdbApi
             }
         }
 
-        private void EnsureSuccess(IElement documentNode)
+        private void ThrowIfIqdbError(IElement documentNode)
         {
             var errorString = documentNode.QuerySelector(".err")?.TextContent;
 
@@ -285,14 +283,13 @@ namespace IqdbApi
             return yourImage;
         }
 
-        private (double SearchInSeconds, int SearchedImagesCount) GetSearchStats(IHtmlDocument html)
+        private (double SearchInSeconds, int SearchedImagesCount) GetSearchStats(IElement rootElement)
         {
-            var matches = GetSearchStatsMatches(html);
+            var matches = GetSearchStatsMatches(rootElement);
 
             var last = matches[matches.Count - 1].ToString();
             var first = matches[0].ToString();
             
-
             if (!Double.TryParse(last,
                 NumberStyles.Any,
                 CultureInfo.InvariantCulture,
@@ -312,10 +309,11 @@ namespace IqdbApi
             return (seconds, imageCount);
         }
 
-        private MatchCollection GetSearchStatsMatches(IHtmlDocument html)
+        private MatchCollection GetSearchStatsMatches(IElement rootElement)
         {
-            var searchedStatsNode = html.QuerySelector("body > p");
-            var searchedStatsText = searchedStatsNode?.TextContent;
+            var searchedStatsText = rootElement
+                                        .QuerySelector("body > p")
+                                        ?.TextContent;
 
             if (String.IsNullOrWhiteSpace(searchedStatsText))
             {
@@ -326,9 +324,9 @@ namespace IqdbApi
             return matches;
         }
         
-        private SearchMoreInfo ParseSearchMoreInfo(IHtmlDocument html)
+        private SearchMoreInfo ParseSearchMoreInfo(IElement rootElement)
         {
-            var searchMoreNode = html.QuerySelector("#yetmore");
+            var searchMoreNode = rootElement.QuerySelector("#yetmore");
             var serachMoreLink = searchMoreNode?.Attributes["href"]?.Value;
 
             if (String.IsNullOrWhiteSpace(serachMoreLink))
@@ -343,10 +341,8 @@ namespace IqdbApi
                 Original = args["org"],
                 Thumb = args["thu"]
             };
-
-
+            
             return searchMoreInfo;
-
         }
     }
 }
