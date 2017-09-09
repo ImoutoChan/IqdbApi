@@ -5,3 +5,5 @@ IqdbApi/bin/
 /IqdbApi.xTests/bin
 IqdbApi.xTests/obj/
 .vs/
+.vs/IqdbApi/v15/.suo
+.idea/
