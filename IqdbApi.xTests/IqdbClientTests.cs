@@ -34,7 +34,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                     "https://pp.userapi.com/c639830/v639830431/102ad/KknV_pMoh1A.jpg",
                     "https://pp.userapi.com/c626224/v626224431/5decf/VvTpyU8A0Zc.jpg",
                     "https://files.yande.re/sample/5aa94d7e5e8a7209f889459ef9f2ab9e/yande.re 392121 sample amatsukaze_(kancolle) kantai_collection pantsu rensouhou-kun see_through seifuku snow_is_ stockings string_panties thighhighs wet.jpg",
-                    "https://cs541604.userapi.com/c836722/v836722677/342ba/JKnecCszdCM.jpg"
+                    "https://pp.userapi.com/c837222/v837222814/5e568/XD4IGnKx0Us.jpg"
                 };
 
                 return urls.Select(x => new[] {x});
