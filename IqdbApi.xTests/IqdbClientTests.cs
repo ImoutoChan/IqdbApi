@@ -34,7 +34,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                     "https://pp.userapi.com/c639830/v639830431/102ad/KknV_pMoh1A.jpg",
                     "https://pp.userapi.com/c626224/v626224431/5decf/VvTpyU8A0Zc.jpg",
                     "https://files.yande.re/sample/5aa94d7e5e8a7209f889459ef9f2ab9e/yande.re 392121 sample amatsukaze_(kancolle) kantai_collection pantsu rensouhou-kun see_through seifuku snow_is_ stockings string_panties thighhighs wet.jpg",
-                    "https://cs541604.userapi.com/c836722/v836722677/342ba/JKnecCszdCM.jpg"
+                    "https://pp.userapi.com/c837222/v837222814/5e568/XD4IGnKx0Us.jpg"
                 };
 
                 return urls.Select(x => new[] {x});
@@ -143,11 +143,11 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                     api.SearchUrl(" afsdfqewr1234 "));
 
                 // size
-                await Assert.ThrowsAsync<ImageTooLagreException>(() => 
+                await Assert.ThrowsAsync<ImageTooLargeException>(() => 
                     api.SearchUrl("https://files.yande.re/image/8f8c1f35e4ca613487dda4ea2d282077/yande.re%20377441%20armor%20bodysuit%20gun%20heroes_of_the_storm%20mecha%20monster%20overwatch%20sword%20tattoo%20tracer%20weapon%20zarya.jpg"));
 
                 // resolution
-                await Assert.ThrowsAsync<ImageTooLagreException>(() => 
+                await Assert.ThrowsAsync<ImageTooLargeException>(() => 
                     api.SearchUrl("https://files.yande.re/image/cd73e77b015a257fa807afdc3043cbc0/yande.re%20277274%20aoki_hagane_no_arpeggio%20ass%20bikini%20morita_kazuaki%20panty_pull%20stick_poster%20swimsuits%20takao_%28aoki_hagane_no_arpeggio%29.jpg"));
 
             }
@@ -264,7 +264,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
 
                 using (var fs = new FileStream("Resources/large.jpg", FileMode.Open))
                 {
-                    await Assert.ThrowsAsync<ImageTooLagreException>(() =>
+                    await Assert.ThrowsAsync<ImageTooLargeException>(() =>
                         api.SearchFile(fs));
                 }
             }
