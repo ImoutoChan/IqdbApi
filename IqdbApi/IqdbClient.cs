@@ -87,7 +87,7 @@ namespace IqdbApi
             }
             if (fileStream.Length > 8388608)
             {
-                throw new ImageTooLagreException();
+                throw new ImageTooLargeException();
             }
 
             var form = GetFromDataContent(fileStream);
@@ -103,7 +103,7 @@ namespace IqdbApi
             {
                 if (response.StatusCode == HttpStatusCode.RequestEntityTooLarge)
                 {
-                    throw new ImageTooLagreException(innerException: e);
+                    throw new ImageTooLargeException(innerException: e);
                 }
 
                 throw;

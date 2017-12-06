@@ -69,7 +69,7 @@ namespace IqdbApi
 
             if (errorString.Contains("too large"))
             {
-                throw new ImageTooLagreException(innerException: new Exception(errorString));
+                throw new ImageTooLargeException(innerException: new Exception(errorString));
             }
 
             if (errorString.Contains("HTTP request failed"))
