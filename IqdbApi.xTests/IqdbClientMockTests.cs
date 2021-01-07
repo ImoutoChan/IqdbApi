@@ -13,6 +13,7 @@ using IqdbApi.xTests.Helpers;
 using RichardSzalay.MockHttp;
 using RichardSzalay.MockHttp.Matchers;
 using Xunit;
+using MatchType = IqdbApi.Enums.MatchType;
 
 namespace IqdbApi.xTests.IqdbApiTestContainer
 {

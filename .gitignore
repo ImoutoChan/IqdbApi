@@ -7,3 +7,6 @@ IqdbApi.xTests/obj/
 .vs/
 .vs/IqdbApi/v15/.suo
 .idea/
+/IqdbApi.sln.DotSettings.user
+/IqdbApi/Properties/PublishProfiles/*.user
+/IqdbApi/*.user
