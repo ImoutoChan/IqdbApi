@@ -1,5 +1,4 @@
 ﻿using AngleSharp.Dom;
-using AngleSharp.Parser.Html;
 using IqdbApi.Enums;
 using IqdbApi.Exceptions;
 using IqdbApi.Models;
@@ -9,6 +8,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using AngleSharp.Html.Parser;
 using Match = IqdbApi.Models.Match;
 
 namespace IqdbApi
@@ -33,7 +33,7 @@ namespace IqdbApi
         public SearchResult ParseResult(string html)
         {
             var parser = new HtmlParser();
-            var rootElement = parser.Parse(html).DocumentElement;
+            var rootElement = parser.ParseDocument(html).DocumentElement;
             
             ThrowIfIqdbError(rootElement);
 

@@ -8,6 +8,7 @@ using IqdbApi.Exceptions;
 using IqdbApi.Models;
 using Xunit;
 using Xunit.Sdk;
+using MatchType = IqdbApi.Enums.MatchType;
 
 namespace IqdbApi.xTests.IqdbApiTestContainer
 {
@@ -228,6 +229,43 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                 Assert.NotNull(result.Matches);
                 Assert.True(result.Matches.Count(match => match.MatchType == MatchType.Other) > 0);
                 Assert.True(result.Matches.Count(match => match.MatchType == MatchType.Additional) > 1);
+                Assert.True(result.Matches.Count(match => match.MatchType == MatchType.Best) == 1);
+
+                AssertSearchStats(result);
+
+                Assert.NotNull(result.YourImage);
+                Assert.False(String.IsNullOrWhiteSpace(result.YourImage.Name));
+                Assert.False(String.IsNullOrWhiteSpace(result.YourImage.PreviewUrl));
+
+                foreach (var match in result.Matches)
+                {
+                    Assert.True(match.Similarity > 0);
+                    Assert.NotEqual(default(Resolution), match.Resolution);
+
+                    Assert.False(String.IsNullOrWhiteSpace(match.PreviewUrl));
+                    Assert.False(String.IsNullOrWhiteSpace(match.Url));
+                }
+            }
+
+            [Theory]
+            [InlineData("Resources/photo_118@27-11-2020_12-14-32.jpg")]
+            public async Task WillFindMatches2(string filename)
+            {
+                var api = _iqdbClientFixture.GetIqdbClient();
+
+                SearchResult result;
+
+                using (var fs = new FileStream(filename, FileMode.Open))
+                {
+                    result = await api.SearchFile(fs);
+                }
+
+                Assert.NotNull(result);
+                Assert.True(result.IsFound);
+
+                Assert.NotNull(result.Matches);
+                Assert.True(result.Matches.Count(match => match.MatchType == MatchType.Other) > 0);
+                Assert.True(result.Matches.Count(match => match.MatchType == MatchType.Additional) == 0);
                 Assert.True(result.Matches.Count(match => match.MatchType == MatchType.Best) == 1);
 
                 AssertSearchStats(result);
