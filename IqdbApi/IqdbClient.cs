@@ -12,25 +12,27 @@ namespace IqdbApi
 {
     public class IqdbClient : IIqdbClient
     {
-        private readonly int _waitMilliseconds;
-        private const string _baseAddress = @"https://iqdb.org/";
-        private readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1);
-        private DateTimeOffset _lastRequestTime = DateTimeOffset.Now.AddDays(-1);
+        private const string BaseAddress = @"https://iqdb.org/";
 
         private readonly HttpClient _httpClient;
+        private readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1);
+        private readonly int _waitMilliseconds;
 
-        public IqdbClient(HttpMessageHandler httpMessageHendler = null, int waitMilliseconds = 5100)
+        private DateTimeOffset _lastRequestTime = DateTimeOffset.Now.AddDays(-1);
+
+        public IqdbClient(HttpMessageHandler httpMessageHandler = null, int waitMilliseconds = 5100)
         {
-            var handler = httpMessageHendler ?? new HttpClientHandler();
+            var handler = httpMessageHandler ?? new HttpClientHandler();
 
             _httpClient = new HttpClient(handler);
-            _httpClient.BaseAddress = new Uri(_baseAddress);
+            _httpClient.BaseAddress = new Uri(BaseAddress);
 
             _waitMilliseconds = waitMilliseconds;
         }
 
-        private async Task<T> UseClient<T>(Func<HttpClient, CancellationToken, Task<T>> action, 
-                                           CancellationToken cancellationToken = default(CancellationToken))
+        private async Task<T> UseClient<T>(
+            Func<HttpClient, CancellationToken, Task<T>> action,
+            CancellationToken cancellationToken = default)
         {
             await _httpClientSemaphoreSlim.WaitAsync(cancellationToken);
 
@@ -52,11 +54,11 @@ namespace IqdbApi
                 _lastRequestTime = DateTimeOffset.UtcNow;
                 _httpClientSemaphoreSlim.Release();
             }
-
         }
 
-        public async Task<SearchResult> SearchUrl(string url, 
-                                                  CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<SearchResult> SearchUrl(
+            string url,
+            CancellationToken cancellationToken = default)
         {
             if (url == null)
             {
@@ -66,10 +68,11 @@ namespace IqdbApi
             {
                 throw new ArgumentException(nameof(url));
             }
-            
-            
-            var httpResponse = await UseClient(async (httpClient, cT) => await httpClient.GetAsync($"?url={url}", cT),
-                                               cancellationToken);
+
+
+            var httpResponse = await UseClient(
+                async (httpClient, cT) => await httpClient.GetAsync($"?url={url}", cT),
+                cancellationToken);
 
             httpResponse.EnsureSuccessStatusCode();
             var html = await httpResponse.Content.ReadAsStringAsync();
@@ -78,22 +81,24 @@ namespace IqdbApi
             return parser.ParseResult(html);
         }
 
-        public async Task<SearchResult> SearchFile(Stream fileStream, 
-                                                   CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<SearchResult> SearchFile(
+            Stream fileStream,
+            CancellationToken cancellationToken = default)
         {
             if (fileStream == null)
             {
                 throw new ArgumentNullException(nameof(fileStream));
             }
-            if (fileStream.Length > 8388608)
+            if (fileStream.Length > 8_388_608)
             {
                 throw new ImageTooLargeException();
             }
 
             var form = GetFromDataContent(fileStream);
-            
-            var response = await UseClient(async (httpClient, cT) => await httpClient.PostAsync("/", form, cT),
-                                           cancellationToken);
+
+            var response = await UseClient(
+                async (httpClient, cT) => await httpClient.PostAsync("/", form, cT),
+                cancellationToken);
 
             try
             {
@@ -132,7 +137,7 @@ namespace IqdbApi
             }
 
             form.Add(new StreamContent(fileStream), "file", "image.jpg");
-            form.Add(new StringContent(String.Empty), "url");
+            form.Add(new StringContent(string.Empty), "url");
 
             return form;
         }
