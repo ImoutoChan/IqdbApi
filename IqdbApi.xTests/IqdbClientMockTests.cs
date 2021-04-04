@@ -184,7 +184,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                     "https://pp.userapi.com/c626224/v626224431/5f1bf/v4xwKIUIaaM.jpg",
                     "https://pp.userapi.com/c636425/v636425431/4d13c/R20-IOXNFds.jpg"
                 };
-                
+
                 await Task.WhenAll(urls.Select(GetImage));
 
 
@@ -236,7 +236,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                 }
             }
 
-            [Fact(Skip = "don't work unless run exclusively")]
+            [Fact(Skip = "doesn't work unless run exclusively")]
             public async Task WillThrowExceptions()
             {
                 IIqdbClient api = GetIqdbClient();
@@ -248,7 +248,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
                 }
 
                 await Assert.ThrowsAsync<ArgumentNullException>(() => api.SearchFile(null));
-                
+
                 using (var fs = new FileStream("Resources/large.jpg", FileMode.Open))
                 {
                     await Assert.ThrowsAsync<ImageTooLargeException>(() =>
@@ -282,7 +282,7 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             Assert.True(result.SearchedInSeconds > 0);
         }
 
-        private static IIqdbClient GetIqdbClient(int delay = 0, Action actionOnRequest = null) 
+        private static IIqdbClient GetIqdbClient(int delay = 0, Action actionOnRequest = null)
             => new IqdbClient(GetHttpHandlerMock(actionOnRequest), delay);
 
         private static HttpMessageHandler GetHttpHandlerMock(Action actionOnRequest = null)
@@ -291,19 +291,19 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
 
             mockHttp.SetAction(actionOnRequest);
 
-            foreach (var urlRespone in IqdbHttpResponsesMock.GetResponses)
+            foreach (var urlResponse in IqdbHttpResponsesMock.GetResponses)
             {
-                mockHttp.When(urlRespone.Key)
-                    .Respond(HttpStatusCode.OK, new StringContent(urlRespone.Value));
+                mockHttp.When(urlResponse.Key)
+                    .Respond(HttpStatusCode.OK, new StringContent(urlResponse.Value));
             }
 
-            foreach (var urlRespone in IqdbHttpResponsesMock.PostResponses)
+            foreach (var urlResponse in IqdbHttpResponsesMock.PostResponses)
             {
                 mockHttp
-                    .When(HttpMethod.Post, "https://iqdb.org")
-                    .With(new CustomMatcher(httpRequestMessage 
-                                                => CompareContent(httpRequestMessage.Content, urlRespone.GetLength())))
-                    .Respond(HttpStatusCode.OK, new StringContent(urlRespone.Response));
+                    .When(HttpMethod.Post, "https://www.iqdb.org")
+                    .With(new CustomMatcher(httpRequestMessage
+                                                => CompareContent(httpRequestMessage.Content, urlResponse.GetLength())))
+                    .Respond(HttpStatusCode.OK, new StringContent(urlResponse.Response));
             }
 
             return mockHttp;
