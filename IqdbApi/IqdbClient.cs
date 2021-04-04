@@ -12,7 +12,7 @@ namespace IqdbApi
 {
     public class IqdbClient : IIqdbClient
     {
-        private const string BaseAddress = @"https://iqdb.org/";
+        private const string BaseAddress = @"https://www.iqdb.org/";
 
         private readonly HttpClient _httpClient;
         private readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1);

@@ -291,19 +291,19 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
 
             mockHttp.SetAction(actionOnRequest);
 
-            foreach (var urlRespone in IqdbHttpResponsesMock.GetResponses)
+            foreach (var urlResponse in IqdbHttpResponsesMock.GetResponses)
             {
-                mockHttp.When(urlRespone.Key)
-                    .Respond(HttpStatusCode.OK, new StringContent(urlRespone.Value));
+                mockHttp.When(urlResponse.Key)
+                    .Respond(HttpStatusCode.OK, new StringContent(urlResponse.Value));
             }
 
-            foreach (var urlRespone in IqdbHttpResponsesMock.PostResponses)
+            foreach (var urlResponse in IqdbHttpResponsesMock.PostResponses)
             {
                 mockHttp
-                    .When(HttpMethod.Post, "https://iqdb.org")
+                    .When(HttpMethod.Post, "https://www.iqdb.org")
                     .With(new CustomMatcher(httpRequestMessage
-                                                => CompareContent(httpRequestMessage.Content, urlRespone.GetLength())))
-                    .Respond(HttpStatusCode.OK, new StringContent(urlRespone.Response));
+                                                => CompareContent(httpRequestMessage.Content, urlResponse.GetLength())))
+                    .Respond(HttpStatusCode.OK, new StringContent(urlResponse.Response));
             }
 
             return mockHttp;

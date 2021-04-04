@@ -9,19 +9,19 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
         public class PostResponse
         {
             public string File { get; set; }
-            
+
             public string Response { get; set; }
 
 	        public HttpStatusCode Code { get; set; }
-	        
-            public long GetLength() 
+
+            public long GetLength()
                 => new FileInfo(File).Length;
         }
 
         public static Dictionary<string, string> GetResponses { get; } = new Dictionary<string, string>
         {
             {
-                "https://iqdb.org/?url=https://pp.userapi.com/c639830/v639830431/11db4/peMZxfCdiko.jpg",
+                "https://www.iqdb.org/?url=https://pp.userapi.com/c639830/v639830431/11db4/peMZxfCdiko.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -130,7 +130,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://pp.userapi.com/c636425/v636425431/4d13c/R20-IOXNFds.jpg",
+                "https://www.iqdb.org/?url=https://pp.userapi.com/c636425/v636425431/4d13c/R20-IOXNFds.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -240,7 +240,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
 " },
 
             {
-                "https://iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/5f1bf/v4xwKIUIaaM.jpg",
+                "https://www.iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/5f1bf/v4xwKIUIaaM.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -351,7 +351,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/5d89e/vdcpu2qHqWc.jpg",
+                "https://www.iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/5d89e/vdcpu2qHqWc.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -462,7 +462,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/5dc6b/QqJkFerqHso.jpg",
+                "https://www.iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/5dc6b/QqJkFerqHso.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -573,7 +573,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/5f89c/dGIwli6c92s.jpg",
+                "https://www.iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/5f89c/dGIwli6c92s.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -684,7 +684,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://pp.userapi.com/c639830/v639830431/102ad/KknV_pMoh1A.jpg",
+                "https://www.iqdb.org/?url=https://pp.userapi.com/c639830/v639830431/102ad/KknV_pMoh1A.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -795,7 +795,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/5decf/VvTpyU8A0Zc.jpg",
+                "https://www.iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/5decf/VvTpyU8A0Zc.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -906,7 +906,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://files.yande.re/sample/5aa94d7e5e8a7209f889459ef9f2ab9e/yande.re 392121 sample amatsukaze_(kancolle) kantai_collection pantsu rensouhou-kun see_through seifuku snow_is_ stockings string_panties thighhighs wet.jpg",
+                "https://www.iqdb.org/?url=https://files.yande.re/sample/5aa94d7e5e8a7209f889459ef9f2ab9e/yande.re 392121 sample amatsukaze_(kancolle) kantai_collection pantsu rensouhou-kun see_through seifuku snow_is_ stockings string_panties thighhighs wet.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -1015,7 +1015,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://cs541604.userapi.com/c836722/v836722677/342ba/JKnecCszdCM.jpg",
+                "https://www.iqdb.org/?url=https://cs541604.userapi.com/c836722/v836722677/342ba/JKnecCszdCM.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -1122,7 +1122,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/6291e/z3mBzT9q104.jpg",
+                "https://www.iqdb.org/?url=https://pp.userapi.com/c626224/v626224431/6291e/z3mBzT9q104.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -1231,7 +1231,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://yande.re/favicon.ico",
+                "https://www.iqdb.org/?url=https://yande.re/favicon.ico",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -1318,7 +1318,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://iqdb.org/default.css",
+                "https://www.iqdb.org/?url=https://iqdb.org/default.css",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -1405,7 +1405,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://files.yande.re/image/8f8c1f35e4ca613487dda4ea2d282077/yande.re%20377441%20armor%20bodysuit%20gun%20heroes_of_the_storm%20mecha%20monster%20overwatch%20sword%20tattoo%20tracer%20weapon%20zarya.jpg",
+                "https://www.iqdb.org/?url=https://files.yande.re/image/8f8c1f35e4ca613487dda4ea2d282077/yande.re%20377441%20armor%20bodysuit%20gun%20heroes_of_the_storm%20mecha%20monster%20overwatch%20sword%20tattoo%20tracer%20weapon%20zarya.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -1490,7 +1490,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=https://files.yande.re/image/cd73e77b015a257fa807afdc3043cbc0/yande.re%20277274%20aoki_hagane_no_arpeggio%20ass%20bikini%20morita_kazuaki%20panty_pull%20stick_poster%20swimsuits%20takao_%28aoki_hagane_no_arpeggio%29.jpg",
+                "https://www.iqdb.org/?url=https://files.yande.re/image/cd73e77b015a257fa807afdc3043cbc0/yande.re%20277274%20aoki_hagane_no_arpeggio%20ass%20bikini%20morita_kazuaki%20panty_pull%20stick_poster%20swimsuits%20takao_%28aoki_hagane_no_arpeggio%29.jpg",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
@@ -1575,7 +1575,7 @@ To help with server fees, please donate Bitcoin to <a href=""bitcoin:1NHCoJi6KXQ
             },
 
             {
-                "https://iqdb.org/?url=asdfasgsdf",
+                "https://www.iqdb.org/?url=asdfasgsdf",
                 @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 4.0 Transitional//EN"">
 <html><head><title>Multi-service image search - Search results</title>
 <style type=""text/css""><!--
