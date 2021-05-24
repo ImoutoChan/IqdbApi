@@ -9,7 +9,7 @@
     <RepositoryUrl>https://github.com/ImoutoChan/IqdbApi</RepositoryUrl>
     <PackageTags>api iqdb image search</PackageTags>
     <Authors>ImoutoChan</Authors>
-    <Version>2.0.1</Version>
+    <Version>2.1.0</Version>
     <PackageLicenseUrl>https://github.com/ImoutoChan/IqdbApi/blob/master/LICENSE</PackageLicenseUrl>
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>

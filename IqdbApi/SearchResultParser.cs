@@ -111,7 +111,7 @@ namespace IqdbApi
             var newMatch = new Match();
 
             newMatch.MatchType = MatchType.Other;
-            newMatch.Url = match.QuerySelector("tr:nth-child(1) > td > a")?.Attributes["href"]?.Value;
+            newMatch.Url = EnsureScheme(match.QuerySelector("tr:nth-child(1) > td > a")?.Attributes["href"]?.Value);
             newMatch.PreviewUrl = match.QuerySelector("tr:nth-child(1) > td > a > img")?.Attributes["src"]?.Value;
 
             var alt = match.QuerySelector("tr:nth-child(1) > td > a > img")?.Attributes["alt"]?.Value;
@@ -146,7 +146,7 @@ namespace IqdbApi
             }
 
             newMatch.MatchType = matchType.Value;
-            newMatch.Url = match.QuerySelector("tr:nth-child(2) > td > a")?.Attributes["href"]?.Value;
+            newMatch.Url = EnsureScheme(match.QuerySelector("tr:nth-child(2) > td > a")?.Attributes["href"]?.Value);
             newMatch.PreviewUrl = match.QuerySelector("tr:nth-child(2) > td > a > img")?.Attributes["src"]?.Value;
 
             var imageAlt = match.QuerySelector("tr:nth-child(2) > td > a > img")?.Attributes["alt"]?.Value;
@@ -169,7 +169,17 @@ namespace IqdbApi
             return newMatch;
         }
 
-        private byte GetSimilarity(string innerText)
+        private static string EnsureScheme(string value)
+        {
+            if (value?.StartsWith("//") == true)
+            {
+                return "https:" + value;
+            }
+
+            return value;
+        }
+
+        private static byte GetSimilarity(string innerText)
         {
             var simString = innerText.Split('%').First();
 

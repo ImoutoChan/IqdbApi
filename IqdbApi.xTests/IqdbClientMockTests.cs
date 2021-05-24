@@ -71,6 +71,18 @@ namespace IqdbApi.xTests.IqdbApiTestContainer
             }
 
             [Fact]
+            public async Task ImageUrlShouldStartWithScheme()
+            {
+                var url = "https://pp.userapi.com/c639830/v639830431/11db4/peMZxfCdiko.jpg";
+
+                var api = GetIqdbClient();
+
+                var result = await api.SearchUrl(url);
+
+                result.Matches.ForEach(x => x.Url.Should().StartWith("http"));
+            }
+
+            [Fact]
             public async Task WillNotFindMatches()
             {
                 var url = "https://pp.userapi.com/c626224/v626224431/6291e/z3mBzT9q104.jpg";
