@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -10,9 +10,21 @@ using IqdbApi.Models;
 
 namespace IqdbApi
 {
+    public enum ProxyOption:byte
+	{
+        HttpsOnly,
+        HttpOnly,
+        TryHttpsFirst,
+        TryHttpFirst
+	}
     public class IqdbClient : IIqdbClient
     {
-        private const string BaseAddress = @"https://www.iqdb.org/";
+        static readonly Uri _httpUri = new Uri("http://www.iqdb.org/");
+        static readonly Uri _httpsUri = new Uri("https://www.iqdb.org");
+        private readonly Uri _firstUri;
+        private readonly Uri _secondUri;
+        private bool _usingFirst = true;
+        private readonly bool _tryOnFailure = true;
 
         private readonly HttpClient _httpClient;
         private readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1);
@@ -20,12 +32,31 @@ namespace IqdbApi
 
         private DateTimeOffset _lastRequestTime = DateTimeOffset.Now.AddDays(-1);
 
-        public IqdbClient(HttpMessageHandler httpMessageHandler = null, int waitMilliseconds = 5100)
+        public IqdbClient(HttpMessageHandler httpMessageHandler = null, int waitMilliseconds = 5100, ProxyOption proxy = ProxyOption.TryHttpsFirst)
         {
             var handler = httpMessageHandler ?? new HttpClientHandler();
 
             _httpClient = new HttpClient(handler);
-            _httpClient.BaseAddress = new Uri(BaseAddress);
+            switch (proxy)
+            {
+                case ProxyOption.HttpsOnly:
+                    _firstUri = _httpsUri;
+                    _tryOnFailure = false;
+                    break;
+                case ProxyOption.HttpOnly:
+                    _firstUri = _httpUri;
+                    _tryOnFailure = false;
+                    break;
+                case ProxyOption.TryHttpsFirst:
+                    _firstUri = _httpsUri;
+                    _secondUri = _httpUri;
+                    break;
+                case ProxyOption.TryHttpFirst:
+                    _firstUri = _httpUri;
+                    _secondUri = _httpsUri;
+                    break;
+            }
+            _httpClient.BaseAddress = _firstUri;
 
             _waitMilliseconds = waitMilliseconds;
         }
@@ -71,7 +102,25 @@ namespace IqdbApi
 
 
             var httpResponse = await UseClient(
-                async (httpClient, cT) => await httpClient.GetAsync($"?url={url}", cT),
+                async (httpClient, cT) =>
+                {
+                    try
+                    { return await httpClient.GetAsync($"?url={url}", cT); }
+                    catch (Exception ex)
+                    {
+                        if (_tryOnFailure)
+                        {
+                            if (_usingFirst)
+                                httpClient.BaseAddress = _secondUri;
+                            else
+                                httpClient.BaseAddress = _firstUri;
+                            _usingFirst = !_usingFirst;
+                            return await httpClient.GetAsync($"?url={url}", cT);
+                        }
+                        else
+                            throw ex;
+                    }
+                },
                 cancellationToken);
 
             httpResponse.EnsureSuccessStatusCode();
