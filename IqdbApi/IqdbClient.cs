@@ -10,23 +10,21 @@ using IqdbApi.Models;
 
 namespace IqdbApi
 {
-    public enum ProxyOption:byte
-	{
+    public enum ProxyOption : byte
+    {
         HttpsOnly,
         HttpOnly,
         TryHttpsFirst,
         TryHttpFirst
-	}
+    }
     public class IqdbClient : IIqdbClient
     {
         static readonly Uri _httpUri = new Uri("http://www.iqdb.org/");
         static readonly Uri _httpsUri = new Uri("https://www.iqdb.org");
-        private readonly Uri _firstUri;
-        private readonly Uri _secondUri;
-        private bool _usingFirst = true;
+        private HttpClient _firstClient;
+        private HttpClient _secondClient;
         private readonly bool _tryOnFailure = true;
 
-        private readonly HttpClient _httpClient;
         private readonly SemaphoreSlim _httpClientSemaphoreSlim = new SemaphoreSlim(1);
         private readonly int _waitMilliseconds;
 
@@ -36,27 +34,25 @@ namespace IqdbApi
         {
             var handler = httpMessageHandler ?? new HttpClientHandler();
 
-            _httpClient = new HttpClient(handler);
             switch (proxy)
             {
                 case ProxyOption.HttpsOnly:
-                    _firstUri = _httpsUri;
+                    _firstClient = new HttpClient(handler) { BaseAddress = _httpsUri };
                     _tryOnFailure = false;
                     break;
                 case ProxyOption.HttpOnly:
-                    _firstUri = _httpUri;
+                    _firstClient = new HttpClient(handler) { BaseAddress = _httpUri };
                     _tryOnFailure = false;
                     break;
                 case ProxyOption.TryHttpsFirst:
-                    _firstUri = _httpsUri;
-                    _secondUri = _httpUri;
+                    _firstClient = new HttpClient(handler) { BaseAddress = _httpsUri };
+                    _secondClient = new HttpClient(handler) { BaseAddress = _httpUri };
                     break;
                 case ProxyOption.TryHttpFirst:
-                    _firstUri = _httpUri;
-                    _secondUri = _httpsUri;
+                    _firstClient = new HttpClient(handler) { BaseAddress = _httpUri };
+                    _secondClient = new HttpClient(handler) { BaseAddress = _httpsUri };
                     break;
             }
-            _httpClient.BaseAddress = _firstUri;
 
             _waitMilliseconds = waitMilliseconds;
         }
@@ -78,7 +74,19 @@ namespace IqdbApi
 
             try
             {
-                return await action(_httpClient, cancellationToken);
+                return await action(_firstClient, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                if (_tryOnFailure)
+                {
+                    HttpClient Temp = _firstClient;
+                    _firstClient = _secondClient;
+                    _secondClient = Temp;
+                    return await action(_firstClient, cancellationToken);
+                }
+                else
+                    throw ex;
             }
             finally
             {
@@ -102,25 +110,7 @@ namespace IqdbApi
 
 
             var httpResponse = await UseClient(
-                async (httpClient, cT) =>
-                {
-                    try
-                    { return await httpClient.GetAsync($"?url={url}", cT); }
-                    catch (Exception ex)
-                    {
-                        if (_tryOnFailure)
-                        {
-                            if (_usingFirst)
-                                httpClient.BaseAddress = _secondUri;
-                            else
-                                httpClient.BaseAddress = _firstUri;
-                            _usingFirst = !_usingFirst;
-                            return await httpClient.GetAsync($"?url={url}", cT);
-                        }
-                        else
-                            throw ex;
-                    }
-                },
+                async (httpClient, cT) => await httpClient.GetAsync($"?url={url}", cT),
                 cancellationToken);
 
             httpResponse.EnsureSuccessStatusCode();
@@ -194,7 +184,8 @@ namespace IqdbApi
         public void Dispose()
         {
             _httpClientSemaphoreSlim?.Dispose();
-            _httpClient?.Dispose();
+            _firstClient?.Dispose();
+            _secondClient?.Dispose();
         }
     }
 }
