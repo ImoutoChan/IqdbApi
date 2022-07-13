@@ -18,6 +18,8 @@ namespace IqdbApi
 
         private DateTimeOffset _lastRequestTime = DateTimeOffset.Now.AddDays(-1);
 
+        protected virtual string Url => "www.iqdb.org";
+
         public IqdbClient(
             HttpMessageHandler httpMessageHandler = null,
             int waitMilliseconds = 5100,
@@ -29,7 +31,7 @@ namespace IqdbApi
 
             _httpClient = new HttpClient(handler)
             {
-                BaseAddress = new Uri($"{scheme}://www.iqdb.org/")
+                BaseAddress = new Uri($"{scheme}://{Url}/")
             };
 
             _waitMilliseconds = waitMilliseconds;

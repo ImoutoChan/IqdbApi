@@ -27,7 +27,10 @@ namespace IqdbApi
                 {"Sankaku Channel", Source.SankakuChannel},
                 {"The Anime Gallery", Source.TheAnimeGallery},
                 {"yande.re", Source.Yandere},
-                {"Zerochan", Source.Zerochan}
+                {"Zerochan", Source.Zerochan},
+
+                {"3dbooru", Source._3dbooru},
+                {"Idol Complex", Source.IdolComplex},
             };
 
         public SearchResult ParseResult(string html)
@@ -208,7 +211,6 @@ namespace IqdbApi
 
         private Source GetSource(string innerText)
         {
-
             if (!_sourceMapper.ContainsKey(innerText))
             {
                 throw new FormatException($"Can't get source from {innerText}.");
