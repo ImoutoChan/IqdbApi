@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using IqdbApi.Enums;
 using IqdbApi.Exceptions;
 using IqdbApi.Models;
 using Xunit;
-using Xunit.Sdk;
 using MatchType = IqdbApi.Enums.MatchType;
 
-namespace IqdbApi.xTests.IqdbApiTestContainer
+namespace IqdbApi.xTests
 {
     public class IqdbApiRealTests : IClassFixture<IqdbClientFixture>
     {

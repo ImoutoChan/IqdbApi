@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
-using IqdbApi.Enums;
 using IqdbApi.Exceptions;
 using IqdbApi.Models;
 using IqdbApi.xTests.Helpers;
@@ -15,7 +14,7 @@ using RichardSzalay.MockHttp.Matchers;
 using Xunit;
 using MatchType = IqdbApi.Enums.MatchType;
 
-namespace IqdbApi.xTests.IqdbApiTestContainer
+namespace IqdbApi.xTests
 {
     public class IqdbApiMockTests
     {

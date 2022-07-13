@@ -12,6 +12,7 @@ namespace IqdbApi.Enums
         Zerochan,
         AnimePictures,
 
+        // for 3d.iqdb.org
         _3dbooru,
         IdolComplex,
     }

@@ -28,7 +28,6 @@ namespace IqdbApi
                 {"The Anime Gallery", Source.TheAnimeGallery},
                 {"yande.re", Source.Yandere},
                 {"Zerochan", Source.Zerochan},
-
                 {"3dbooru", Source._3dbooru},
                 {"Idol Complex", Source.IdolComplex},
             };
@@ -85,7 +84,7 @@ namespace IqdbApi
                 throw new NotImageException(innerException: new Exception(errorString));
             }
 
-            throw new InvalidFileFormatException("Unrecignized exception", new Exception(errorString));
+            throw new InvalidFileFormatException("Unrecognized exception", new Exception(errorString));
         }
 
         private (List<Match> Matches, YourImage YourImage) GetMatches(IElement documentNode)

@@ -36,6 +36,9 @@
     <None Update="Resources\photo_118%4027-11-2020_12-14-32.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\453ee0211dd3d3ce119dd686142632e6.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

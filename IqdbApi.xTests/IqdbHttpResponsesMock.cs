@@ -2,7 +2,7 @@
 using System.IO;
 using System.Net;
 
-namespace IqdbApi.xTests.IqdbApiTestContainer
+namespace IqdbApi.xTests
 {
     public class IqdbHttpResponsesMock
     {
