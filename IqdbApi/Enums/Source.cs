@@ -10,6 +10,9 @@ namespace IqdbApi.Enums
         Eshuushuu,
         TheAnimeGallery,
         Zerochan,
-        AnimePictures
+        AnimePictures,
+
+        _3dbooru,
+        IdolComplex,
     }
 }
