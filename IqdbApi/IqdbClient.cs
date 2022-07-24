@@ -116,7 +116,7 @@ namespace IqdbApi
             }
         }
 
-        private static MultipartFormDataContent GetFromDataContent(Stream fileStream)
+        protected virtual MultipartFormDataContent GetFromDataContent(Stream fileStream)
         {
             var form = new MultipartFormDataContent();
 
