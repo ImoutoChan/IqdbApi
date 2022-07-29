@@ -10,5 +10,3 @@ IqdbApi.xTests/obj/
 /IqdbApi.sln.DotSettings.user
 /IqdbApi/Properties/PublishProfiles/*.user
 /IqdbApi/*.user
-IqdbManualTests/obj/
-IqdbManualTests/bin/
