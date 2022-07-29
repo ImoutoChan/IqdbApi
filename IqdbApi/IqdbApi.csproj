@@ -6,11 +6,11 @@
     <Description>.net standart library for searching images on iqdb.org</Description>
     <Copyright>(c) ImoutoChan</Copyright>
     <PackageProjectUrl>https://github.com/ImoutoChan/IqdbApi</PackageProjectUrl>
+    <PackageLicense>https://github.com/ImoutoChan/IqdbApi/blob/master/LICENSE</PackageLicense>
     <RepositoryUrl>https://github.com/ImoutoChan/IqdbApi</RepositoryUrl>
     <PackageTags>api iqdb image search</PackageTags>
     <Authors>ImoutoChan</Authors>
     <Version>2.2.0</Version>
-    <PackageLicenseUrl>https://github.com/ImoutoChan/IqdbApi/blob/master/LICENSE</PackageLicenseUrl>
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 

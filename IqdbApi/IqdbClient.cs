@@ -44,7 +44,8 @@ namespace IqdbApi
             if (url == null) throw new ArgumentNullException(nameof(url));
             if (string.IsNullOrWhiteSpace(url)) throw new ArgumentException(nameof(url));
 
-
+            url = WebUtility.UrlEncode(url);
+            
             var httpResponse = await UseClient(
                 async (httpClient, cT) => await httpClient.GetAsync($"?url={url}", cT),
                 cancellationToken);
@@ -116,7 +117,7 @@ namespace IqdbApi
             }
         }
 
-        private static MultipartFormDataContent GetFromDataContent(Stream fileStream)
+        protected virtual MultipartFormDataContent GetFromDataContent(Stream fileStream)
         {
             var form = new MultipartFormDataContent();
 
