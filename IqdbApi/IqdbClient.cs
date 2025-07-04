@@ -88,6 +88,8 @@ namespace IqdbApi
             return parser.ParseResult(html);
         }
 
+        public void ConfigureHttpClient(Action<HttpClient> configure) => configure(_httpClient);
+
         public void Dispose()
         {
             _httpClientSemaphoreSlim?.Dispose();

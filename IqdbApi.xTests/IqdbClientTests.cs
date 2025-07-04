@@ -232,6 +232,19 @@ namespace IqdbApi.xTests
                 }
             }
 
+            [Fact]
+            public async Task WillUseSmallTimeout()
+            {
+                const string url = "https://pp.userapi.com/c639830/v639830431/11db4/peMZxfCdiko.jpg";
+                var client = new IqdbClient();
+                client.ConfigureHttpClient(x => x.Timeout = TimeSpan.FromSeconds(1));
+
+                var exception = await Assert.ThrowsAsync<TaskCanceledException>(() => client.SearchUrl(url));
+                Assert.Contains(
+                    "The request was canceled due to the configured HttpClient.Timeout of 1 seconds elapsing",
+                    exception.Message);
+            }
+
             public TheSearchUrlMethod(IqdbClientFixture iqdbClientFixture) : base(iqdbClientFixture)
             {
             }

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ namespace IqdbApi.xTests
         public async Task WillFindMatchesWithFileSearch()
         {
             var api = new Iqdb3dClient();
+            api.ConfigureHttpClient(x => x.Timeout = TimeSpan.FromSeconds(1000));
 
             SearchResult result;
 
@@ -49,6 +51,7 @@ namespace IqdbApi.xTests
             const string url = "https://sun9-25.userapi.com/impg/YnOMtl6hbLQNLFEFHYyLHVZz8ZuCEXk3Rf3Mjg/jgpcUKmkFm4.jpg?size=600x900&quality=96&sign=0b1bc7f8fa2f2355a00a4b526358c429";
             
             var api = new Iqdb3dClient();
+            api.ConfigureHttpClient(x => x.Timeout = TimeSpan.FromSeconds(1000));
 
             var result = await api.SearchUrl(url);
 
